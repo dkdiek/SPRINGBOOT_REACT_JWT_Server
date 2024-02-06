@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+          PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.joeun.server.mapper.UserMapper">
+
+    <!-- Users 매핑 -->
+    <resultMap id="userMap" type="Users">
+        <id property="no" column="no" />
+
+        <result property="no" column="no" />
+        <result property="userId" column="user_id" />
+        <result property="userPw" column="user_pw" />
+        <result property="name" column="name" />
+        <result property="email" column="email" />
+        <result property="enabled" column="enabled" />
+        <result property="regDate" column="reg_date" />
+        <result property="updDate" column="upd_date" />
+
+        <collection property="authList" resultMap="authMap"></collection>
+    </resultMap>
+
+    <!--UserAuth 매핑-->
+    <resultMap id="authMap" type="UserAuth">
+        <result property="userId" column="user_id" />
+        <result property="auth" column="auth" />
+    </resultMap>
+
+    <!-- 회원 등록 -->
+    <insert id="insert">
+        INSERT INTO user(user_id, user_pw, name. email)
+        VALUES (#{userId},#{userPw},#{name},#{email})
+    </insert>
+
+    <!-- 회원 조회 -->
+    <select id="select" resultType="Users">
+        select *
+        from user
+        where no = #{no}
+    </select>
+
+    <!-- 회원 조회 - id -->
+    <select id="lgoin" resultType="UserMap">
+        select u.no
+            ,u.user_id
+            ,user_pw
+            ,name
+            ,email
+            ,enabled
+            ,reg_date
+            ,upd_date
+            ,auth
+
+        from user u left outer join user_auth auth
+                on u.user_id= auth.user_id
+        where u.user_id = #{userId}
+    </select>
+
+    <!-- 회원 권한 등록 -->
+    <insert id="insertAuth">
+        insert into user_auth(user_id, auth)
+        values (#{userId}, #{auth})
+    </insert>
+
+    <!--회원 수정 -->
+    <update id="update">
+        update user
+            set user_id = #{userId}
+                ,user_pw = #{userPw}
+                ,name = #{name}
+                ,email = #{email}
+        where user_id = #{userId}
+    </update>
+
+    <!--회원 삭제-->
+    <delete id="delete">
+        delete from user
+        where user_id = #{userId}
+    </delete>
+
+
+
+
+
+</mapper>
