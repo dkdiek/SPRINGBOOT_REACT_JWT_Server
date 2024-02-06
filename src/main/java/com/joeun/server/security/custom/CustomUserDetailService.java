@@ -1,6 +1,7 @@
 package com.joeun.server.security.custom;
 
 
+import com.joeun.server.dto.CustomUser;
 import com.joeun.server.dto.Users;
 import com.joeun.server.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +34,12 @@ public class CustomUserDetailService implements UserDetailsService {
         log.info(user.toString());
 
         // Users -> CustomUser
+        CustomUser customUser = new CustomUser(user);
 
+        log.info("customUser : ");
+        log.info(customUser.toString());
 
-        return null;
+        return customUser;
 
 
     }
