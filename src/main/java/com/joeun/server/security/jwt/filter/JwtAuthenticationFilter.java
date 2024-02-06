@@ -1,5 +1,8 @@
 package com.joeun.server.security.jwt.filter;
 
+import com.joeun.server.dto.CustomUser;
+import com.joeun.server.security.jwt.constants.JwtConstants;
+import com.joeun.server.security.jwt.provider.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +16,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /*
           (/login)
@@ -27,9 +32,11 @@ username,password 인증시도(attemptAuthentication)
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     // 생성자
     private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
         //필터 url 경로 설정: /login
         setFilterProcessesUrl("/login");
     }
@@ -63,7 +70,29 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         return authentication;
     }
 
+    /*
+    인증 성공 메소드
+    jwt Token 생성
+    jwt 응답 헤더에 설정
+     */
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+        log.info("인증 성공...");
+
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+        int userNo = user.getUser().getNo();
+        String userId = user.getUser().getUserId();
+
+        List<String> roles = user.getUser().getAuthList().stream()
+                .map((auth)-> auth.getAuth())
+                .collect(Collectors.toList());
+
+        // JWT
+        String jwt = jwtTokenProvider.createToken(userNo, userId, roles);
+
+        response.addHeader(JwtConstants.TOKEN_HEADER, JwtConstants.TOKEN_PREFIX + jwt);
+        response.setStatus(200);
+
+
     }
 }

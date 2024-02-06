@@ -2,6 +2,7 @@ package com.joeun.server.config;
 
 import com.joeun.server.security.custom.CustomUserDetailService;
 import com.joeun.server.security.jwt.filter.JwtAuthenticationFilter;
+import com.joeun.server.security.jwt.provider.JwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -23,6 +24,9 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailService customUserDetailService;
 
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.info("securityFilterChain...");
@@ -37,7 +41,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable());
 
         // 필터 설정
-        http.addFilterAt(new JwtAuthenticationFilter(authenticationManager), null)
+        http.addFilterAt(new JwtAuthenticationFilter(authenticationManager, jwtTokenProvider), null)
                 .addFilterBefore(null, null);
 
         // 인가 설정

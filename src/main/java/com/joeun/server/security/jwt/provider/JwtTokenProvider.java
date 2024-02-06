@@ -157,7 +157,44 @@ public class JwtTokenProvider {
         return null;
     }
 
+    /*
+    토큰 유효성 검사
+    @param jwt
+    @return
+    true 유효
+    false 만료
+     */
+    public boolean validateToken(String jwt){
 
+        try{
+            // 🔐➡👩‍💼 JWT 파싱
+            Jws<Claims> parsedToken = Jwts.parser()
+                    .verifyWith(getShaKey())
+                    .build()
+                    .parseSignedClaims(jwt);
+            log.info("##### 토큰 만료 기간 #####");
+            log.info("->" + parsedToken.getPayload().getExpiration() );
+
+            Date exp = parsedToken.getPayload().getExpiration();
+            //만료기한 현재시간 비교
+            //만료시간 12.1 오늘 12월 14일 더 전이면 true 즉 만료 !로 만료면 false응답
+            return !exp.before(new Date());
+
+        } catch(ExpiredJwtException exception) {
+            log.error("Token Expired");                // 토큰 손상
+            return false;
+        } catch (JwtException exception) {
+            log.error("Token Tampered");                // 토큰 손상
+            return false;
+        } catch (NullPointerException exception) {
+            log.error("Token is null");                 // 토큰 없음
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+
+
+    }
 
 
 
