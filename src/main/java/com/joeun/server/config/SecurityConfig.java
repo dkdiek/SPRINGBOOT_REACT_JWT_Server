@@ -1,36 +1,19 @@
 package com.joeun.server.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig  {
-
-  /* @Autowired
-    private CustomUserDetailService customUserDetailService;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    private AuthenticationManager authenticationManager;
-*/
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        this.authenticationManager = authenticationConfiguration.getAuthenticationManager();
-        return authenticationManager;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,26 +29,26 @@ public class SecurityConfig  {
         http.csrf( csrf -> csrf.disable() );
 
         // 필터 설정
-        http.addFilterAt(new JwtAuthenticationFilter(authenticationManager, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtRequestFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-        ;
+        http.addFilterAt(null, null)
+                .addFilterBefore(null, null);
 
+        // 인가 설정
         http.authorizeHttpRequests( authorizeRequests ->
-                authorizeRequests
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/").permitAll()
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/user/**").hasAnyRole("USER" , "ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated() )
-        ;
-
-        http.userDetailsService(customUserDetailService);
+                                    authorizeRequests
+                                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                                        .requestMatchers("/").permitAll()
+                                        .requestMatchers("/login").permitAll()
+                                        .requestMatchers("user/**").hasAnyRole("USER","ADMIN")
+                                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                                        .anyRequest().authenticated()
+                                    );
+        // 인증 방식 설정
+        http.userDetailsService(null);
 
         return http.build();
-    }*/
+    }
 
-
+    // 암호화 알고리즘 방식 Bcrypt
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
