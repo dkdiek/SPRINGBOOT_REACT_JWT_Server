@@ -2,6 +2,7 @@ package com.joeun.server.config;
 
 import com.joeun.server.security.custom.CustomUserDetailService;
 import com.joeun.server.security.jwt.filter.JwtAuthenticationFilter;
+import com.joeun.server.security.jwt.filter.JwtRequestFilter;
 import com.joeun.server.security.jwt.provider.JwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Slf4j
 @Configuration
@@ -41,8 +43,10 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable());
 
         // 필터 설정
-        http.addFilterAt(new JwtAuthenticationFilter(authenticationManager, jwtTokenProvider), null)
-                .addFilterBefore(null, null);
+        http.addFilterAt(new JwtAuthenticationFilter(authenticationManager, jwtTokenProvider)
+                        , UsernamePasswordAuthenticationFilter.class)
+
+                .addFilterBefore(new JwtRequestFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         // 인가 설정
         http.authorizeHttpRequests(authorizeRequests ->
